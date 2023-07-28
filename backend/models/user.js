@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(Comment, { as: 'author', foreignKey: 'author_id' })
     }
 
+    toJSON() {
+        const values = Object.assign({}, this.get());
+        delete values.passwordDigest;
+        return values;
+      }
+
   };
   User.init({
     userId: {

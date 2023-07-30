@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const db = require("../models");
-const jwt = require('json-web-token')
+const jwt = require("json-web-token");
 
 const { Place, Comment, User } = db;
 
@@ -14,6 +14,9 @@ router.post("/", async (req, res) => {
     if (!req.body.state) {
         req.body.state = "USA";
     }
+
+    
+    
     const place = await Place.create(req.body);
     res.json(place);
 });
@@ -101,27 +104,7 @@ router.post("/:placeId/comments", async (req, res) => {
         });
     }
 
-    let currentUser;
-    try {
-        const [authMethod, token] = req.headers.authorization.split(" ");
-        if (authMethod == "Bearer") {
-            const result = await jwt.decode(process.env.JWT_SECRET, token);
-            const { userId } = result.value;
-            currentUser = await User.findOne({
-                where: {
-                    userId
-                },
-            });
-        }
-    } catch(e) {
-        currentUser = null;
-    }
-
-    // const author = await User.findOne({
-    //     where: { userId: req.body.authorId },
-    // });
-
-    if (!currentUser) {
+    if (!req.currentUser) {
         return res.status(404).json({
             message: `Log in to leave comment... `,
         });
@@ -129,13 +112,13 @@ router.post("/:placeId/comments", async (req, res) => {
 
     const comment = await Comment.create({
         ...req.body,
-        authorId: currentUser.userId,
+        authorId: req.currentUser.userId,
         placeId: placeId,
     });
 
     res.send({
         ...comment.toJSON(),
-        author: currentUser
+        author: req.currentUser,
     });
 });
 
@@ -154,6 +137,10 @@ router.delete("/:placeId/comments/:commentId", async (req, res) => {
         if (!comment) {
             res.status(404).json({
                 message: `Could not find comment with id "${commentId}" for place with id "${placeId}"`,
+            });
+        } else if (comment.authorId !== req.currentUser?.userId) {
+            res.status(403).json({
+                message: `You do not have permission to delete comment "${comment.commentId}"`,
             });
         } else {
             await comment.destroy();

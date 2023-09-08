@@ -26,5 +26,8 @@
     "react-dom": "^16.14.0",
     "sequelize": "^6.6.5",
     "sequelize-cli": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17"
   }
 }

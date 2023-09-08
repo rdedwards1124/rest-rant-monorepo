@@ -5,7 +5,10 @@ const jwt = require("json-web-token");
 
 const { User } = db;
 
-router.post("/", async (req, res) => {
+import { Request, Response } from 'express';
+
+
+router.post("/", async (req: Request, res: Response) => {
     console.log("logged in with", req.body);
     let { email, password } = req.body;
     let user = await User.findOne({
@@ -28,7 +31,7 @@ router.post("/", async (req, res) => {
     console.log(user);
 });
 
-router.get("/profile", async (req, res) => {
+router.get("/profile", async (req: Request, res: Response) => {
     try {
         res.status(200).json(req.currentUser)
     } catch (e) {
@@ -37,3 +40,6 @@ router.get("/profile", async (req, res) => {
 });
 
 module.exports = router;
+
+/**/
+
